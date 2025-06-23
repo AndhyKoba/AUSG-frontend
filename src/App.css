@@ -1,0 +1,52 @@
+:root {
+  --color-crimson-50: #fef2f2;
+  --color-crimson-100: #fee5e6;
+  --color-crimson-200: #fccfd2;
+  --color-crimson-300: #f9a8ad;
+  --color-crimson-400: #f57783;
+  --color-crimson-500: #ec475a;
+  --color-crimson: #d82643;
+  --color-crimson-700: #b61a37;
+  --color-crimson-800: #991835;
+  --color-crimson-900: #831833;
+  --color-crimson-950: #490816;
+
+  --color-cerulean-blue-50: #f1f5fd;
+  --color-cerulean-blue-100: #dfe8fa;
+  --color-cerulean-blue-200: #c7d7f6;
+  --color-cerulean-blue-300: #a0bdf0;
+  --color-cerulean-blue-400: #739ae7;
+  --color-cerulean-blue-500: #5278df;
+  --color-cerulean-blue: #3454d1;
+  --color-cerulean-blue-700: #344ac1;
+  --color-cerulean-blue-800: #303d9d;
+  --color-cerulean-blue-900: #2b377d;
+  --color-cerulean-blue-950: #1e244d;
+
+  --antiFlask-50: #efefef;
+  --antiFlask-100: #e5e7eb;
+  --antiFlask-200: #d1d5db;
+  --antiFlask-300: #9ca3af;
+  --antiFlask-400: #6b7280;
+  --antiFlask-500: #4b5563;
+  --antiFlask-600: #374151;
+  --antiFlask-700: #1e293b;
+  --antiFlask-800: #0f172a;
+  --antiFlask-900: #071528;
+  --antiFlask-950: #041122;
+}
+
+.gradient {
+    background: linear-gradient(135deg, var(--color-crimson-500), var(--color-cerulean-blue-500));
+}
+
+.gradient-sombre {
+  background: linear-gradient(135deg, var(--antiFlask-800), var(--antiFlask-200));
+
+}
+
+.center-parent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
