@@ -676,7 +676,7 @@ export default function AdminDashboard() {
                 <VStack spacing={6} align="stretch">
                     <Box p={2} mb={4}>
                         <Image
-                            src='/public/AUSG logo blanc.png'
+                            src='/public/AUSG_logo_blanc.png'
                             alt='AUSG Logo'
                             boxSize='80px'
                             objectFit='contain'
