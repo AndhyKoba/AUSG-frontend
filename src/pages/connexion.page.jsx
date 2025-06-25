@@ -8,7 +8,7 @@ function ConnexionPage() {
               <Image
               boxSize='100px'
               objectFit='cover'
-              src='public/assets/AUSG logo blanc.png'
+              src='public/AUSG logo blanc.png'
               alt='AUSG logo'>
               </Image>
             <ConnexionForm />

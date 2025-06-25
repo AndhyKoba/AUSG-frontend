@@ -474,7 +474,7 @@ export default function AgentForm() {
                 <Image
                     boxSize='64px'
                     objectFit='contain'
-                    src='public/assets/AUSG logo blanc.png'
+                    src='public/AUSG logo blanc.png'
                     alt='AUSG logo'
                 />
                 <Spacer />
