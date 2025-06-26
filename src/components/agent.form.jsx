@@ -63,17 +63,14 @@ export default function AgentForm() {
         count: steps.length,
     });
 
-    const calculateTtc = (totalHorsTaxes, taxAmount) => {
-        const sum = parseFloat(totalHorsTaxes || 0);
-        const tax = parseFloat(taxAmount || 0);
-        return sum + tax;
-      };
+    useEffect(() => {
+        const calculatedTtcValue = calculateTtc(total_hors_taxes, montant_de_la_taxe);
+        setTotalTtc(calculatedTtcValue);
+      }, [total_hors_taxes, montant_de_la_taxe]);
       
       const handleCalculateAndVerifyTotals = () => {
-        // Ici, total_hors_taxes et montant_de_la_taxe sont les valeurs entrées par l'utilisateur.
         // total_ttc est la valeur calculée et affichée automatiquement par le useEffect.
       
-        // 1. Vérification INTERNE : Est-ce que le TTC affiché est bien (Hors Taxes + Taxe) ?
         const expectedTtcFromInputs = total_hors_taxes + montant_de_la_taxe;
       
         if (Math.abs(total_ttc - expectedTtcFromInputs) > 0.01) {
@@ -407,7 +404,7 @@ export default function AgentForm() {
                         <NumberInput
                             size="sm"
                             min={0}
-                            value={total_hors_taxes} // Value comes directly from state
+                            value={total_hors_taxes} 
                             onChange={(valueString, valueAsNumber) => setTotalHorsTaxes(valueAsNumber || 0)} // User can change this
                         >
                             <NumberInputField />
