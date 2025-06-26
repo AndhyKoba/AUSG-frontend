@@ -63,38 +63,39 @@ export default function AgentForm() {
         count: steps.length,
     });
 
-    const handleCalculateAndVerifyTotals = () => {
-        // Calculate sum of transaction types to get Total Hors Taxes
+    const calculateTtc = (totalHorsTaxes, taxAmount) => {
+        const sum = parseFloat(totalHorsTaxes || 0);
+        const tax = parseFloat(taxAmount || 0);
+        return sum + tax;
+      };
+      
+      const handleCalculateAndVerifyTotals = () => {
         const sumOfTransactionTypes = billet + vente_diverses + reajustement + xbag + penalite + remboursement;
         setTotalHorsTaxes(sumOfTransactionTypes);
-
-        // Calculate Total TTC
-        const calculatedTtc = sumOfTransactionTypes + montant_de_la_taxe;
+      
+        const calculatedTtc = calculateTtc(sumOfTransactionTypes, montant_de_la_taxe);
         setTotalTtc(calculatedTtc);
-
-        // Calculate sum of payment methods
+      
         const sumOfPaymentMethods = especes + mobile + cb + virement + cheque;
-
-        // Check for consistency: Calculated TTC should match Sum of Payment Methods
-        // Using a small tolerance for floating point comparisons
+      
         if (Math.abs(calculatedTtc - sumOfPaymentMethods) > 0.01) {
-            toast({
-                title: 'Discrépance détectée !',
-                description: `Le Total TTC calculé (${calculatedTtc.toFixed(2)}) ne correspond pas à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(2)}). Veuillez vérifier.`,
-                status: 'warning',
-                duration: 9000,
-                isClosable: true,
-            });
+          toast({
+            title: 'Discrépance détectée !',
+            description: `Le Total TTC calculé (${calculatedTtc.toFixed(2)}) ne correspond pas à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(2)}). Veuillez vérifier.`,
+            status: 'warning',
+            duration: 9000,
+            isClosable: true,
+          });
         } else {
-            toast({
-                title: 'Totaux vérifiés.',
-                description: 'Le Total TTC calculé correspond à la somme des modes de paiement.',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
+          toast({
+            title: 'Totaux vérifiés.',
+            description: 'Le Total TTC calculé correspond à la somme des modes de paiement.',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
         }
-    };
+      };
 
     const handleLogout = async () => {
         const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -199,9 +200,9 @@ export default function AgentForm() {
             virement,
             cheque,
 
-            total_hors_taxes: sumOfTransactionTypes, // Use calculated value
+            total_hors_taxes,
             montant_de_la_taxe,
-            total_ttc: calculatedTtc, // Use calculated value
+            total_ttc: calculatedTtc, 
         };
 
         console.log("Données de la transaction à envoyer:", transactionData);
@@ -266,8 +267,11 @@ export default function AgentForm() {
                                 value={point_de_vente}
                                 onChange={(e) => setPointDeVente(e.target.value)}
                             >
-                                <option value="ADL">ADL</option>
-                                <option value="CentreVille">Centre Ville</option>
+                                <option value="ADL1">ADL 1</option>
+                                <option value="ADL1">ADL 2</option>
+                                <option value="ADP">ADP</option>
+                                <option value="ADP">MFF</option>
+                                <option value="ADP">FCV</option>
                             </Select>
                         </FormControl>
                         <Flex mt={6} justify="flex-end">
@@ -379,34 +383,48 @@ export default function AgentForm() {
                 return (
                     <Box>
                         <Heading size="md" mb={4}>Totaux</Heading>
+
                         <FormControl id='total_hors_taxes' mb={3} isRequired>
-                            <FormLabel fontSize="sm">Total hors taxes (Calculé)</FormLabel>
-                            <NumberInput size="sm" min={0} value={total_hors_taxes.toFixed(2)} isReadOnly>
-                                <NumberInputField _readOnly={{ bg: 'gray.100' }} />
-                            </NumberInput>
+                        <FormLabel fontSize="sm">Total hors taxes</FormLabel>
+                        <NumberInput
+                            size="sm"
+                            min={0}
+                            value={total_hors_taxes} // Value comes directly from state
+                            onChange={(valueString, valueAsNumber) => setTotalHorsTaxes(valueAsNumber || 0)} // User can change this
+                        >
+                            <NumberInputField />
+                        </NumberInput>
                         </FormControl>
+
                         <FormControl id='montant_de_la_taxe' mb={3} isRequired>
-                            <FormLabel fontSize="sm">Montant de la Taxe (À saisir)</FormLabel>
-                            <NumberInput size="sm" min={0} value={montant_de_la_taxe} onChange={(valueString, valueAsNumber) => setMontantDeLaTaxe(valueAsNumber || 0)}>
-                                <NumberInputField />
-                            </NumberInput>
+                        <FormLabel fontSize="sm">Montant de la Taxe</FormLabel>
+                        <NumberInput
+                            size="sm"
+                            min={0}
+                            value={montant_de_la_taxe}
+                            onChange={(valueString, valueAsNumber) => setMontantDeLaTaxe(valueAsNumber || 0)}
+                        >
+                            <NumberInputField />
+                        </NumberInput>
                         </FormControl>
+
                         <FormControl id='total_ttc' mb={3} isRequired>
-                            <FormLabel fontSize="sm">Total TTC (Calculé)</FormLabel>
-                            <NumberInput size="sm" min={0} value={total_ttc.toFixed(2)} isReadOnly>
-                                <NumberInputField _readOnly={{ bg: 'gray.100' }} />
-                            </NumberInput>
+                        <FormLabel fontSize="sm">Total TTC (Calculé)</FormLabel>
+                        <NumberInput size="sm" min={0} value={total_ttc.toFixed(2)} isReadOnly>
+                            <NumberInputField _readOnly={{ bg: 'gray.100' }} />
+                        </NumberInput>
                         </FormControl>
+
                         <Flex mt={6} justify="space-between">
-                            <Button onClick={() => setActiveStep(activeStep - 1)}>
-                                Précédent
-                            </Button>
-                            <Button onClick={handleCalculateAndVerifyTotals} colorScheme="blue">
-                                Calculer & Vérifier Totaux
-                            </Button>
-                            <Button onClick={() => setActiveStep(activeStep + 1)}>
-                                Suivant
-                            </Button>
+                        <Button onClick={() => setActiveStep(activeStep - 1)}>
+                            Précédent
+                        </Button>
+                        <Button onClick={handleCalculateAndVerifyTotals} colorScheme="blue">
+                            Calculer & Vérifier Totaux
+                        </Button>
+                        <Button onClick={() => setActiveStep(activeStep + 1)}>
+                            Suivant
+                        </Button>
                         </Flex>
                     </Box>
                 );
