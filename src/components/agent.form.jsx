@@ -70,26 +70,44 @@ export default function AgentForm() {
       };
       
       const handleCalculateAndVerifyTotals = () => {
-        const sumOfTransactionTypes = billet + vente_diverses + reajustement + xbag + penalite + remboursement;
-        setTotalHorsTaxes(sumOfTransactionTypes);
+        // Ici, total_hors_taxes et montant_de_la_taxe sont les valeurs entrées par l'utilisateur.
+        // total_ttc est la valeur calculée et affichée automatiquement par le useEffect.
       
-        const calculatedTtc = calculateTtc(sumOfTransactionTypes, montant_de_la_taxe);
-        setTotalTtc(calculatedTtc);
+        // 1. Vérification INTERNE : Est-ce que le TTC affiché est bien (Hors Taxes + Taxe) ?
+        const expectedTtcFromInputs = total_hors_taxes + montant_de_la_taxe;
       
+        if (Math.abs(total_ttc - expectedTtcFromInputs) > 0.01) {
+          toast({
+            title: 'Erreur de calcul du TTC détectée !',
+            description: `Le Total TTC affiché (${total_ttc.toFixed(2)}) ne correspond PAS à (Total Hors Taxes + Montant de la Taxe) (${expectedTtcFromInputs.toFixed(2)}).`,
+            status: 'error', // C'est une erreur de logique de calcul, donc 'error' est approprié.
+            duration: 9000,
+            isClosable: true,
+          });
+          // On pourrait retourner ici si cette erreur est critique et bloque la suite
+          // return;
+        }
+      
+        // 2. Vérification de COHÉRENCE : Est-ce que le TTC (correctement calculé) correspond aux modes de paiement ?
+        // La somme des modes de paiement représente l'argent RÉELLEMENT reçu, qui devrait inclure la taxe.
         const sumOfPaymentMethods = especes + mobile + cb + virement + cheque;
       
-        if (Math.abs(calculatedTtc - sumOfPaymentMethods) > 0.01) {
+        // IMPORTANT : On retire cette ligne car elle fausse la comparaison si sumOfPaymentMethods est déjà TTC
+        // const sumOfPaymentMethodsPlusTaxes = sumOfPaymentMethods + montant_de_la_taxe;
+      
+        if (Math.abs(total_ttc - sumOfPaymentMethods) > 0.01) {
           toast({
-            title: 'Discrépance détectée !',
-            description: `Le Total TTC calculé (${calculatedTtc.toFixed(2)}) ne correspond pas à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(2)}). Veuillez vérifier.`,
-            status: 'warning',
+            title: 'Discrépance des paiements détectée !',
+            description: `Le Total TTC calculé (${total_ttc.toFixed(2)}) ne correspond PAS à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(2)}). Veuillez vérifier.`,
+            status: 'warning', // C'est une discrépance, pas forcément une erreur de code.
             duration: 9000,
             isClosable: true,
           });
         } else {
+          // Si toutes les vérifications passent
           toast({
             title: 'Totaux vérifiés.',
-            description: 'Le Total TTC calculé correspond à la somme des modes de paiement.',
+            description: 'Le Total TTC est correct et correspond à la somme des modes de paiement.',
             status: 'success',
             duration: 3000,
             isClosable: true,
