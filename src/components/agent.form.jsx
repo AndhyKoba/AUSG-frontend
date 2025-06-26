@@ -62,7 +62,7 @@ export default function AgentForm() {
         index: 0,
         count: steps.length,
     });
-
+    
     useEffect(() => {
         const calculatedTtcValue = calculateTtc(total_hors_taxes, montant_de_la_taxe);
         setTotalTtc(calculatedTtcValue);
