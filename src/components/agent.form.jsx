@@ -565,7 +565,7 @@ export default function AgentForm() {
               <Text>Chèque: {cheque.toFixed(2)}</Text>
               <br />
               <Text mb={2} fontWeight="semibold">
-                Totaux Saisis & Calculés
+                Totaux
               </Text>
               <Text>
                 Total hors taxes: {total_hors_taxes.toFixed(2)}
