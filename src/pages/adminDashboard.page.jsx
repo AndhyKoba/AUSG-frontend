@@ -146,7 +146,7 @@ export default function AdminDashboard() {
         }
         localStorage.removeItem('userPseudo');
         localStorage.removeItem('userRole');
-        navigate('/connexion');
+        navigate('/');
     };
 
     const handleCreateAgent = () => {

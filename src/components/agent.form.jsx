@@ -162,7 +162,7 @@ export default function AgentForm() {
     }
     localStorage.removeItem("userPseudo");
     localStorage.removeItem("userRole");
-    navigate("/connexion");
+    navigate("/");
   };
 
   // Réinitialisation du formulaire
