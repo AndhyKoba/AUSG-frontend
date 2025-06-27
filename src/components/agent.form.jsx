@@ -100,38 +100,14 @@ export default function AgentForm() {
 
   const handleCalculateAndVerifyTotals = () => {
     // total_ttc est la valeur calculée et affichée automatiquement par le useEffect.
-
-    const expectedTtcFromInputs = total_hors_taxes + montant_de_la_taxe;
-
-    if (Math.abs(total_ttc - expectedTtcFromInputs) > 0.01) {
-      toast({
-        title: "Erreur de calcul du TTC détectée !",
-        description: `Le Total TTC affiché (${total_ttc.toFixed(
-          2
-        )}) ne correspond PAS à (Total Hors Taxes + Montant de la Taxe) (${expectedTtcFromInputs.toFixed(
-          2
-        )}).`,
-        status: "error", // C'est une erreur de logique de calcul, donc 'error' est approprié.
-        duration: 9000,
-        isClosable: true,
-      });
-      // On pourrait retourner ici si cette erreur est critique et bloque la suite
-      // return;
-    }
-
-    // 2. Vérification de COHÉRENCE : Est-ce que le TTC (correctement calculé) correspond aux modes de paiement ?
-    // La somme des modes de paiement représente l'argent RÉELLEMENT reçu, qui devrait inclure la taxe.
     const sumOfPaymentMethods = especes + mobile + cb + virement + cheque;
 
-    // IMPORTANT : On retire cette ligne car elle fausse la comparaison si sumOfPaymentMethods est déjà TTC
-    // const sumOfPaymentMethodsPlusTaxes = sumOfPaymentMethods + montant_de_la_taxe;
-
-    if (Math.abs(total_ttc - sumOfPaymentMethods) > 0.01) {
+    if (Math.abs(total_hors_taxes - sumOfPaymentMethods) > 0.01) {
       toast({
         title: "Discrépance des paiements détectée !",
-        description: `Le Total TTC calculé (${total_ttc.toFixed(
+        description: `Le Total hors taxe entré (${total_hors_taxes.toFixed(
           2
-        )}) ne correspond PAS à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(
+        )}) ne correspond pas à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(
           2
         )}). Veuillez vérifier.`,
         status: "warning", // C'est une discrépance, pas forcément une erreur de code.
@@ -143,7 +119,7 @@ export default function AgentForm() {
       toast({
         title: "Totaux vérifiés.",
         description:
-          "Le Total TTC est correct et correspond à la somme des modes de paiement.",
+          "Le Total hors taxe est correct et correspond à la somme des modes de paiement.",
         status: "success",
         duration: 3000,
         isClosable: true,
