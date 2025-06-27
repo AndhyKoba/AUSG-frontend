@@ -400,7 +400,7 @@ export default function AdminDashboard() {
                                     <BarChart data={chartDataByPointDeVente}>
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis dataKey="name" />
-                                        <YAxis />
+                                        <YAxis hide />
                                         <Tooltip />
                                         <Legend />
                                         <Bar dataKey="total" fill="#8884d8" name="Total TTC" />
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
                                     <BarChart data={chartDataByPaymentMethod}>
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis dataKey="name" />
-                                        <YAxis />
+                                        <YAxis hide />
                                         <Tooltip />
                                         <Legend />
                                         <Bar dataKey="value" fill="#82ca9d" name="Montant Payé" />

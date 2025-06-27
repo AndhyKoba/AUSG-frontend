@@ -515,7 +515,7 @@ export default function AgentForm() {
                 onClick={handleCalculateAndVerifyTotals}
                 colorScheme="blue"
               >
-                Calculer & Vérifier Totaux
+                Vérifier Totaux
               </Button>
               <Button onClick={() => setActiveStep(activeStep + 1)}>
                 Suivant
@@ -540,40 +540,40 @@ export default function AgentForm() {
               <Text mb={2} fontWeight="semibold">
                 Détails de l'opération
               </Text>
-              <Text>Numéro de clôture: **{numero_de_cloture}**</Text>
-              <Text>Date: **{date}**</Text>
-              <Text>Point de vente: **{point_de_vente}**</Text>
-              <Text>Agent: **{connectedUserPseudo}**</Text>
+              <Text>Numéro de clôture: {numero_de_cloture}</Text>
+              <Text>Date: {date}</Text>
+              <Text>Point de vente: {point_de_vente}</Text>
+              <Text>Agent: {connectedUserPseudo}</Text>
               <br />
               <Text mb={2} fontWeight="semibold">
                 Types de Transaction
               </Text>
-              <Text>Billet: **{billet.toFixed(2)}**</Text>
-              <Text>Vente diverses: **{vente_diverses.toFixed(2)}**</Text>
-              <Text>Réajustement: **{reajustement.toFixed(2)}**</Text>
-              <Text>Xbag: **{xbag.toFixed(2)}**</Text>
-              <Text>Pénalité: **{penalite.toFixed(2)}**</Text>
-              <Text>Remboursement: **{remboursement.toFixed(2)}**</Text>
+              <Text>Billet: {billet.toFixed(2)}</Text>
+              <Text>Vente diverses: {vente_diverses.toFixed(2)}</Text>
+              <Text>Réajustement: {reajustement.toFixed(2)}</Text>
+              <Text>Xbag: {xbag.toFixed(2)}</Text>
+              <Text>Pénalité: {penalite.toFixed(2)}</Text>
+              <Text>Remboursement: {remboursement.toFixed(2)}</Text>
               <br />
               <Text mb={2} fontWeight="semibold">
                 Modes de Paiement
               </Text>
-              <Text>Espèces: **{especes.toFixed(2)}**</Text>
-              <Text>Mobile Money: **{mobile.toFixed(2)}**</Text>
-              <Text>Carte Bancaire: **{cb.toFixed(2)}**</Text>
-              <Text>Virement Bancaire: **{virement.toFixed(2)}**</Text>
-              <Text>Chèque: **{cheque.toFixed(2)}**</Text>
+              <Text>Espèces: {especes.toFixed(2)}</Text>
+              <Text>Mobile Money: {mobile.toFixed(2)}</Text>
+              <Text>Carte Bancaire: {cb.toFixed(2)}</Text>
+              <Text>Virement Bancaire: {virement.toFixed(2)}</Text>
+              <Text>Chèque: {cheque.toFixed(2)}</Text>
               <br />
               <Text mb={2} fontWeight="semibold">
                 Totaux Saisis & Calculés
               </Text>
               <Text>
-                Total hors taxes: **{total_hors_taxes.toFixed(2)}**
+                Total hors taxes: {total_hors_taxes.toFixed(2)}
               </Text>
               <Text>
-                Montant de la Taxe: **{montant_de_la_taxe.toFixed(2)}**
+                Montant de la Taxe: {montant_de_la_taxe.toFixed(2)}
               </Text>
-              <Text>Total TTC: **{total_ttc.toFixed(2)}**</Text>
+              <Text>Total TTC: {total_ttc.toFixed(2)}</Text>
             </Box>
             <Flex mt={6} justify="space-between">
               <Button onClick={() => setActiveStep(activeStep - 1)}>
