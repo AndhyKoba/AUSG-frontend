@@ -33,13 +33,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function AgentForm() {
-  // Step 0: Détails de l'opération
+  // États principaux du formulaire
   const [numero_de_cloture, setNumeroDeCloture] = useState("");
   const [date, setDate] = useState("");
   const [point_de_vente, setPointDeVente] = useState("");
   const [connectedUserPseudo, setConnectedUserPseudo] = useState("");
 
-  // Step 1: Types de Transaction
+  // Types de Transaction
   const [billet, setBillet] = useState(0);
   const [vente_diverses, setVenteDiverses] = useState(0);
   const [reajustement, setReajustement] = useState(0);
@@ -47,21 +47,20 @@ export default function AgentForm() {
   const [penalite, setPenalite] = useState(0);
   const [remboursement, setRemboursement] = useState(0);
 
-  // Step 2: Modes de Paiement
+  // Modes de Paiement
   const [especes, setEspeces] = useState(0);
   const [mobile, setMobile] = useState(0);
   const [cb, setCb] = useState(0);
   const [virement, setVirement] = useState(0);
   const [cheque, setCheque] = useState(0);
 
-  // Step 3: Totaux
+  // Totaux
   const [total_hors_taxes, setTotalHorsTaxes] = useState(0);
   const [montant_de_la_taxe, setMontantDeLaTaxe] = useState(0);
   const [total_ttc, setTotalTtc] = useState(0);
 
   const navigate = useNavigate();
   const toast = useToast();
-
   const [initialPseudoForLogout, setInitialPseudoForLogout] = useState("");
 
   useEffect(() => {
@@ -84,6 +83,8 @@ export default function AgentForm() {
     index: 0,
     count: steps.length,
   });
+
+  // Calcul automatique du TTC
   const calculateTtc = (totalHorsTaxes, taxAmount) => {
     const sum = parseFloat(totalHorsTaxes || 0);
     const tax = parseFloat(taxAmount || 0);
@@ -91,17 +92,12 @@ export default function AgentForm() {
   };
 
   useEffect(() => {
-    const calculatedTtcValue = calculateTtc(
-      total_hors_taxes,
-      montant_de_la_taxe
-    );
-    setTotalTtc(calculatedTtcValue);
+    setTotalTtc(calculateTtc(total_hors_taxes, montant_de_la_taxe));
   }, [total_hors_taxes, montant_de_la_taxe]);
 
+  // Vérification cohérence totaux
   const handleCalculateAndVerifyTotals = () => {
-    // total_ttc est la valeur calculée et affichée automatiquement par le useEffect.
     const sumOfPaymentMethods = especes + mobile + cb + virement + cheque;
-
     if (Math.abs(total_hors_taxes - sumOfPaymentMethods) > 0.01) {
       toast({
         title: "Discrépance des paiements détectée !",
@@ -110,12 +106,11 @@ export default function AgentForm() {
         )}) ne correspond pas à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(
           2
         )}). Veuillez vérifier.`,
-        status: "warning", // C'est une discrépance, pas forcément une erreur de code.
+        status: "warning",
         duration: 9000,
         isClosable: true,
       });
     } else {
-      // Si toutes les vérifications passent
       toast({
         title: "Totaux vérifiés.",
         description:
@@ -127,15 +122,14 @@ export default function AgentForm() {
     }
   };
 
+  // Déconnexion utilisateur
   const handleLogout = async () => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
-
     if (initialPseudoForLogout) {
       try {
         const response = await axios.post(BACKEND_URL + "/users/deconnexion", {
           pseudo: initialPseudoForLogout,
         });
-
         if (response.data.success) {
           toast({
             title: "Déconnexion réussie.",
@@ -156,10 +150,6 @@ export default function AgentForm() {
           });
         }
       } catch (error) {
-        console.error(
-          "Erreur lors de l'appel de déconnexion au backend:",
-          error
-        );
         toast({
           title: "Erreur réseau.",
           description:
@@ -170,80 +160,59 @@ export default function AgentForm() {
         });
       }
     }
-
     localStorage.removeItem("userPseudo");
     localStorage.removeItem("userRole");
     navigate("/connexion");
   };
 
-  // Fonction pour réinitialiser tous les états du formulaire
+  // Réinitialisation du formulaire
   const resetForm = () => {
-    // Step 0
     setNumeroDeCloture("");
     setDate("");
     setPointDeVente("");
-    // setConnectedUserPseudo(''); // Ne pas réinitialiser le pseudo de l'agent, il reste connecté
-
-    // Step 1: Types de Transaction
     setBillet(0);
     setVenteDiverses(0);
     setReajustement(0);
     setXbag(0);
     setPenalite(0);
     setRemboursement(0);
-
-    // Step 2: Modes de Paiement
     setEspeces(0);
     setMobile(0);
     setCb(0);
     setVirement(0);
     setCheque(0);
-
-    // Step 3: Totaux
     setTotalHorsTaxes(0);
     setMontantDeLaTaxe(0);
     setTotalTtc(0);
-
-    // Reset to the first step
     setActiveStep(0);
   };
 
+  // Soumission de la transaction
   const handleSubmitTransaction = async () => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
     const agentName = localStorage.getItem("userPseudo");
-
     const transactionData = {
       numero_de_cloture,
       date,
       point_de_vente,
       agent: agentName,
-
       billet,
       vente_diverses,
       reajustement,
       xbag,
       penalite,
       remboursement,
-
       especes,
       mobile,
       cb,
       virement,
       cheque,
-
       total_hors_taxes,
       montant_de_la_taxe,
-      total_ttc: total_hors_taxes + montant_de_la_taxe, // <-- Correction ici
+      total_ttc: total_hors_taxes + montant_de_la_taxe,
     };
-
-    console.log("Données de la transaction à envoyer:", transactionData);
-
     try {
-      const response = await axios.post(
-        BACKEND_URL + "/transactions",
-        transactionData
-      );
-      console.log("Transaction soumise avec succès:", response.data);
+      await axios.post(BACKEND_URL + "/transactions", transactionData);
       toast({
         title: "Transaction soumise.",
         description: "La transaction a été enregistrée avec succès.",
@@ -251,11 +220,8 @@ export default function AgentForm() {
         duration: 5000,
         isClosable: true,
       });
-
-      // Réinitialiser le formulaire après succès
       resetForm();
     } catch (error) {
-      console.error("Erreur lors de la soumission de la transaction:", error);
       toast({
         title: "Erreur de soumission.",
         description:
@@ -268,6 +234,7 @@ export default function AgentForm() {
     }
   };
 
+  // Rendu dynamique selon l'étape
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
@@ -503,7 +470,6 @@ export default function AgentForm() {
             <Heading size="md" mb={4}>
               Totaux
             </Heading>
-
             <FormControl id="total_hors_taxes" mb={3} isRequired>
               <FormLabel fontSize="sm">Total hors taxes</FormLabel>
               <NumberInput
@@ -512,12 +478,11 @@ export default function AgentForm() {
                 value={total_hors_taxes}
                 onChange={(valueString, valueAsNumber) =>
                   setTotalHorsTaxes(valueAsNumber || 0)
-                } // User can change this
+                }
               >
                 <NumberInputField />
               </NumberInput>
             </FormControl>
-
             <FormControl id="montant_de_la_taxe" mb={3} isRequired>
               <FormLabel fontSize="sm">Montant de la Taxe</FormLabel>
               <NumberInput
@@ -531,7 +496,6 @@ export default function AgentForm() {
                 <NumberInputField />
               </NumberInput>
             </FormControl>
-
             <FormControl id="total_ttc" mb={3} isRequired>
               <FormLabel fontSize="sm">Total TTC (Calculé)</FormLabel>
               <NumberInput
@@ -543,7 +507,6 @@ export default function AgentForm() {
                 <NumberInputField _readOnly={{ bg: "gray.100" }} />
               </NumberInput>
             </FormControl>
-
             <Flex mt={6} justify="space-between">
               <Button onClick={() => setActiveStep(activeStep - 1)}>
                 Précédent
@@ -560,7 +523,7 @@ export default function AgentForm() {
             </Flex>
           </Box>
         );
-      case 4: // Final step for review and submission
+      case 4:
         return (
           <Box>
             <Heading size="md" mb={4}>
@@ -582,7 +545,6 @@ export default function AgentForm() {
               <Text>Point de vente: **{point_de_vente}**</Text>
               <Text>Agent: **{connectedUserPseudo}**</Text>
               <br />
-
               <Text mb={2} fontWeight="semibold">
                 Types de Transaction
               </Text>
@@ -593,7 +555,6 @@ export default function AgentForm() {
               <Text>Pénalité: **{penalite.toFixed(2)}**</Text>
               <Text>Remboursement: **{remboursement.toFixed(2)}**</Text>
               <br />
-
               <Text mb={2} fontWeight="semibold">
                 Modes de Paiement
               </Text>
@@ -603,19 +564,17 @@ export default function AgentForm() {
               <Text>Virement Bancaire: **{virement.toFixed(2)}**</Text>
               <Text>Chèque: **{cheque.toFixed(2)}**</Text>
               <br />
-
               <Text mb={2} fontWeight="semibold">
                 Totaux Saisis & Calculés
               </Text>
               <Text>
-                Total hors taxes (calculé): **{total_hors_taxes.toFixed(2)}**
+                Total hors taxes: **{total_hors_taxes.toFixed(2)}**
               </Text>
               <Text>
-                Montant de la Taxe (saisi): **{montant_de_la_taxe.toFixed(2)}**
+                Montant de la Taxe: **{montant_de_la_taxe.toFixed(2)}**
               </Text>
-              <Text>Total TTC (calculé): **{total_ttc.toFixed(2)}**</Text>
+              <Text>Total TTC: **{total_ttc.toFixed(2)}**</Text>
             </Box>
-
             <Flex mt={6} justify="space-between">
               <Button onClick={() => setActiveStep(activeStep - 1)}>
                 Précédent
@@ -633,7 +592,6 @@ export default function AgentForm() {
 
   return (
     <div>
-      {/* Header section (contains logo, user info, and logout button) */}
       <Flex
         minWidth="max-content"
         alignItems="center"
@@ -658,8 +616,6 @@ export default function AgentForm() {
           Déconnexion
         </Button>
       </Flex>
-
-      {/* Main content: Stepper and Form Grid */}
       <Grid
         templateAreas={`"steps form"`}
         gridTemplateColumns="250px 1fr"
@@ -712,7 +668,6 @@ export default function AgentForm() {
             ))}
           </Stepper>
         </GridItem>
-
         <GridItem
           area="form"
           p="6"
