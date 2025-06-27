@@ -95,33 +95,6 @@ export default function AgentForm() {
     setTotalTtc(calculateTtc(total_hors_taxes, montant_de_la_taxe));
   }, [total_hors_taxes, montant_de_la_taxe]);
 
-  // Vérification cohérence totaux
-  const handleCalculateAndVerifyTotals = () => {
-    const sumOfPaymentMethods = especes + mobile + cb + virement + cheque;
-    if (Math.abs(total_hors_taxes - sumOfPaymentMethods) > 0.01) {
-      toast({
-        title: "Discrépance des paiements détectée !",
-        description: `Le Total hors taxe entré (${total_hors_taxes.toFixed(
-          2
-        )}) ne correspond pas à la somme des modes de paiement (${sumOfPaymentMethods.toFixed(
-          2
-        )}). Veuillez vérifier.`,
-        status: "warning",
-        duration: 9000,
-        isClosable: true,
-      });
-    } else {
-      toast({
-        title: "Totaux vérifiés.",
-        description:
-          "Le Total hors taxe est correct et correspond à la somme des modes de paiement.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
   // Déconnexion utilisateur
   const handleLogout = async () => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -497,7 +470,7 @@ export default function AgentForm() {
               </NumberInput>
             </FormControl>
             <FormControl id="total_ttc" mb={3} isRequired>
-              <FormLabel fontSize="sm">Total TTC (Calculé)</FormLabel>
+              <FormLabel fontSize="sm">Total TTC</FormLabel>
               <NumberInput
                 size="sm"
                 min={0}
@@ -510,12 +483,6 @@ export default function AgentForm() {
             <Flex mt={6} justify="space-between">
               <Button onClick={() => setActiveStep(activeStep - 1)}>
                 Précédent
-              </Button>
-              <Button
-                onClick={handleCalculateAndVerifyTotals}
-                colorScheme="blue"
-              >
-                Vérifier Totaux
               </Button>
               <Button onClick={() => setActiveStep(activeStep + 1)}>
                 Suivant
