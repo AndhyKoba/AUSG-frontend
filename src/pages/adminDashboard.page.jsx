@@ -19,6 +19,7 @@ import {
     getSortedRowModel,
 } from '@tanstack/react-table';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Legend as RechartsLegend } from 'recharts'; // Ajout pour le PieChart
 
 // Composant pour les cartes de statistiques
 const StatCard = ({ title, value }) => (
@@ -85,6 +86,14 @@ export default function AdminDashboard() {
         cheque: 0,
     });
 
+    // États pour les rapports
+    const [reportType, setReportType] = useState('point_de_vente');
+    const [reportPeriod, setReportPeriod] = useState('semaine');
+    const [reportResults, setReportResults] = useState([]);
+    const [reportLoading, setReportLoading] = useState(false);
+    const [weekStart, setWeekStart] = useState('');
+    const [month, setMonth] = useState('');
+
     useEffect(() => {
         const storedPseudo = localStorage.getItem('userPseudo');
         const userRole = localStorage.getItem('userRole');
@@ -93,7 +102,7 @@ export default function AdminDashboard() {
             fetchTransactions();
             fetchAgents();
         } else {
-            navigate('/connexion');
+            navigate('/');
         }
     }, []);
 
@@ -651,6 +660,185 @@ export default function AdminDashboard() {
                         </Modal>
                     </Box>
                 );
+                case 'rapport':
+                    const handleReportSearch = () => {
+                        setReportLoading(true);
+                        let filtered = [...transactions];
+        
+                        // Filtrage par période
+                        if (reportPeriod === 'semaine' && weekStart) {
+                            const start = new Date(weekStart);
+                            const end = new Date(start);
+                            end.setDate(start.getDate() + 6);
+                            filtered = filtered.filter(t => {
+                                const d = new Date(t.date);
+                                return d >= start && d <= end;
+                            });
+                        } else if (reportPeriod === 'mois' && month) {
+                            const [year, m] = month.split('-');
+                            const start = new Date(year, m - 1, 1);
+                            const end = new Date(year, m, 0, 23, 59, 59, 999);
+                            filtered = filtered.filter(t => {
+                                const d = new Date(t.date);
+                                return d >= start && d <= end;
+                            });
+                        }
+        
+                        // Agrégation selon le type de rapport
+                        let results = [];
+                        if (reportType === 'point_de_vente') {
+                            const pvMap = {};
+                            filtered.forEach(t => {
+                                pvMap[t.point_de_vente] = (pvMap[t.point_de_vente] || 0) + 1;
+                            });
+                            results = Object.entries(pvMap).map(([pv, count]) => ({
+                                label: pv,
+                                value: count
+                            }));
+                        } else if (reportType === 'type_paiement') {
+                            const payMap = { especes: 0, mobile: 0, cb: 0, virement: 0, cheque: 0 };
+                            filtered.forEach(t => {
+                                Object.keys(payMap).forEach(key => {
+                                    payMap[key] += t[key] || 0;
+                                });
+                            });
+                            results = Object.entries(payMap).map(([type, total]) => ({
+                                label: type.charAt(0).toUpperCase() + type.slice(1),
+                                value: total
+                            }));
+                        }
+                        setReportResults(results);
+                        setReportLoading(false);
+                    };
+        
+                    // Fonction d'export CSV
+                    const handleExportCSV = () => {
+                        const csv = [
+                            ['Label', 'Valeur'],
+                            ...reportResults.map(r => [r.label, r.value])
+                        ].map(e => e.join(";")).join("\n");
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'rapport.csv';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    };
+        
+                    return (
+                        <Box>
+                            <Heading size="lg" mb={4}>Rapports</Heading>
+                            <HStack spacing={4} mb={4} align="flex-end">
+                                <FormControl>
+                                    <FormLabel>Type de rapport</FormLabel>
+                                    <Select value={reportType} onChange={e => setReportType(e.target.value)}>
+                                        <option value="point_de_vente">Nombre de ventes par Point de Vente</option>
+                                        <option value="type_paiement">Total par Type de Paiement</option>
+                                    </Select>
+                                </FormControl>
+                                <FormControl>
+                                    <FormLabel>Période</FormLabel>
+                                    <Select value={reportPeriod} onChange={e => setReportPeriod(e.target.value)}>
+                                        <option value="semaine">Semaine</option>
+                                        <option value="mois">Mois</option>
+                                    </Select>
+                                </FormControl>
+                                {reportPeriod === 'semaine' && (
+                                    <FormControl>
+                                        <FormLabel>Début de la semaine</FormLabel>
+                                        <Input type="date" value={weekStart} onChange={e => setWeekStart(e.target.value)} />
+                                    </FormControl>
+                                )}
+                                {reportPeriod === 'mois' && (
+                                    <FormControl>
+                                        <FormLabel>Mois</FormLabel>
+                                        <Input type="month" value={month} onChange={e => setMonth(e.target.value)} />
+                                    </FormControl>
+                                )}
+                                <Button
+                                    colorScheme="blue"
+                                    onClick={handleReportSearch}
+                                    isLoading={reportLoading}
+                                    isDisabled={
+                                        (reportPeriod === 'semaine' && !weekStart) ||
+                                        (reportPeriod === 'mois' && !month)
+                                    }
+                                >
+                                    Rechercher
+                                </Button>
+                                <Button
+                                    colorScheme="teal"
+                                    onClick={handleExportCSV}
+                                    isDisabled={reportResults.length === 0}
+                                >
+                                    Exporter CSV
+                                </Button>
+                            </HStack>
+                            {/* Résumé période */}
+                            {(reportPeriod === 'semaine' && weekStart) && (
+                                <Text mb={2} color="gray.600">
+                                    Semaine du {new Date(weekStart).toLocaleDateString()}
+                                </Text>
+                            )}
+                            {(reportPeriod === 'mois' && month) && (
+                                <Text mb={2} color="gray.600">
+                                    Mois de {new Date(month + '-01').toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}
+                                </Text>
+                            )}
+                            <Box bg="white" p={6} borderRadius="lg" shadow="md">
+                                <TableContainer>
+                                    <Table variant="simple" size="sm">
+                                        <Thead>
+                                            <Tr>
+                                                <Th>{reportType === 'point_de_vente' ? 'Point de Vente' : 'Type de Paiement'}</Th>
+                                                <Th isNumeric>{reportType === 'point_de_vente' ? 'Nombre de ventes' : 'Total (Fcfa)'}</Th>
+                                            </Tr>
+                                        </Thead>
+                                        <Tbody>
+                                            {reportResults.length > 0 ? (
+                                                reportResults.map((row, idx) => (
+                                                    <Tr key={idx}>
+                                                        <Td>{row.label}</Td>
+                                                        <Td isNumeric>{row.value}</Td>
+                                                    </Tr>
+                                                ))
+                                            ) : (
+                                                <Tr>
+                                                    <Td colSpan={2} textAlign="center">Aucun résultat</Td>
+                                                </Tr>
+                                            )}
+                                        </Tbody>
+                                    </Table>
+                                </TableContainer>
+                                {/* Pie Chart */}
+                                {reportResults.length > 0 && (
+                                    <Box mt={8}>
+                                        <Heading size="md" mb={4}>Visualisation graphique</Heading>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <PieChart>
+                                                <Pie
+                                                    data={reportResults}
+                                                    dataKey="value"
+                                                    nameKey="label"
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    outerRadius={100}
+                                                    label
+                                                >
+                                                    {reportResults.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip />
+                                                <RechartsLegend />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </Box>
+                                )}
+                            </Box>
+                        </Box>
+                    );
         }
     };
 
@@ -688,6 +876,7 @@ export default function AdminDashboard() {
                     <NavButton text="Vue d'ensemble" isActive={activeSection === 'overview'} onClick={() => setActiveSection('overview')} />
                     <NavButton text="Suivi des Transactions" isActive={activeSection === 'transactions'} onClick={() => setActiveSection('transactions')} />
                     <NavButton text="Gestion des Agents" isActive={activeSection === 'agents'} onClick={() => setActiveSection('agents')} />
+                    <NavButton text="Rapports" isActive={activeSection === 'rapport'} onClick={() => setActiveSection('rapport')} />
                 </VStack>
 
                 <Spacer />
