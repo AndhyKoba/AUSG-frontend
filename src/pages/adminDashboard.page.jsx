@@ -379,6 +379,8 @@ export default function AdminDashboard() {
         })).filter(item => item.value > 0);
     }, [transactions]);
 
+    const pieColors = ['#3182ce', '#63b3ed', '#90cdf4', '#2b6cb0', '#4299e1', '#38a169', '#e53e3e', '#d69e2e'];
+
 
 
 
@@ -766,13 +768,6 @@ export default function AdminDashboard() {
                                     }
                                 >
                                     Rechercher
-                                </Button>
-                                <Button
-                                    colorScheme="teal"
-                                    onClick={handleExportCSV}
-                                    isDisabled={reportResults.length === 0}
-                                >
-                                    Exporter CSV
                                 </Button>
                             </HStack>
                             {/* Résumé période */}
