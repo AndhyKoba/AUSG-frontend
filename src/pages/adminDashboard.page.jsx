@@ -9,6 +9,7 @@ import {
     FormControl, FormLabel, Input, Select,
     useDisclosure,
 } from '@chakra-ui/react';
+import { SearchIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -758,6 +759,19 @@ export default function AdminDashboard() {
                                         <Input type="month" value={month} onChange={e => setMonth(e.target.value)} />
                                     </FormControl>
                                 )}
+                                <Button
+                                    colorScheme="blue"
+                                    onClick={handleReportSearch}
+                                    isLoading={reportLoading}
+                                    isDisabled={
+                                        (reportPeriod === 'semaine' && !weekStart) ||
+                                        (reportPeriod === 'mois' && !month)
+                                    }
+                                    size="md"
+                                    px={6}
+                                >
+                                    <SearchIcon boxSize={5} />
+                                </Button>
                             </HStack>
                             {/* Résumé période */}
                             {(reportPeriod === 'semaine' && weekStart) && (
