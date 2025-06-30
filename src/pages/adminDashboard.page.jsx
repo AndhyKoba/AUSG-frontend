@@ -758,17 +758,6 @@ export default function AdminDashboard() {
                                         <Input type="month" value={month} onChange={e => setMonth(e.target.value)} />
                                     </FormControl>
                                 )}
-                                <Button
-                                    colorScheme="blue"
-                                    onClick={handleReportSearch}
-                                    isLoading={reportLoading}
-                                    isDisabled={
-                                        (reportPeriod === 'semaine' && !weekStart) ||
-                                        (reportPeriod === 'mois' && !month)
-                                    }
-                                >
-                                    Rechercher
-                                </Button>
                             </HStack>
                             {/* Résumé période */}
                             {(reportPeriod === 'semaine' && weekStart) && (
