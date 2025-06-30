@@ -380,8 +380,16 @@ export default function AdminDashboard() {
         })).filter(item => item.value > 0);
     }, [transactions]);
 
-    const pieColors = ['#3182ce', '#63b3ed', '#90cdf4', '#2b6cb0', '#4299e1', '#38a169', '#e53e3e', '#d69e2e'];
-
+    const pieColors = [
+    '#4F8A8B', // teal/bleu canard doux
+    '#FBD46D', // jaune pastel
+    '#F76B8A', // rose doux
+    '#A3D2CA', // vert d'eau
+    '#FFB085', // orange pastel
+    '#374785', // bleu foncé doux
+    '#6C5B7B', // violet/gris doux
+    '#F67280', // corail doux
+    ];
 
 
 
